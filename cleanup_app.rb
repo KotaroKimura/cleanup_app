@@ -6,7 +6,10 @@ require 'sqlite3'
 require 'pry-byebug'
 
 class CleanUp
-  def check_boolean_value(boolean_value, record_num, all_record)
+  def check_boolean_value(db, record_num)
+    boolean_value = 0
+    all_record = db.execute("SELECT * FROM cleanup;")
+
     for count in 1..record_num do
       boolean_value = boolean_value + all_record[count - 1][3]
     end
@@ -26,17 +29,13 @@ class CleanUp
   end
 end
 
-
-DBPATH = "/vagrant/clean_up_app/cleanup.sqlite3"
-
-db = SQLite3::Database.new(DBPATH)
-all_record = db.execute("SELECT * FROM cleanup;")
+cleanup = CleanUp.new()
+db = SQLite3::Database.new("/vagrant/clean_up_app/cleanup.sqlite3")
 record_num = db.execute("select count(*) from cleanup;")[0][0]
-boolean_value = 0
 
-CleanUp.new().restart_cleanup_action(db) if CleanUp.new().check_boolean_value(boolean_value, record_num, all_record) == record_num
-select = CleanUp.new().select_cleanup_action(db)
-done = CleanUp.new().done_cleanup_action(select[0], db)
+cleanup.restart_cleanup_action(db) if cleanup.check_boolean_value(db, record_num) == record_num
+select = cleanup.select_cleanup_action(db)
+done = cleanup.done_cleanup_action(select[0], db)
 
 db.close
 
