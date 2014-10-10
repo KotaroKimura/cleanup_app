@@ -35,14 +35,12 @@ record_num = db.execute("select count(*) from cleanup;")[0][0]
 
 if cleanup.check_boolean_value(db, record_num) == record_num
   cleanup.restart_cleanup_action(db)
-  puts "一通りの掃除は終了されています！！！おつかれさまです！！！\n\n"
+  puts "一通りの掃除は終了されています！！！おつかれさまです！！！\n今日は一日お休みです！！！！\n\n"
+else
+  select = cleanup.select_cleanup_action(db)
+  cleanup.done_cleanup_action(select[0], db)
+  puts "#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
 end
 
-select = cleanup.select_cleanup_action(db)
-done = cleanup.done_cleanup_action(select[0], db)
-
-puts "#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
-
 db.close
-
 
