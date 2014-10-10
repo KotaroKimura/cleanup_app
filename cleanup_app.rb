@@ -29,6 +29,12 @@ class CleanUp
   end
 end
 
+class Action
+  def create_action(db, record_num)
+    db.execute("insert into cleanup values(#{record_num + 1}, ?, ?, 0, 1)")
+  end
+end
+
 cleanup = CleanUp.new()
 db = SQLite3::Database.new("/vagrant/clean_up_app/cleanup.sqlite3")
 record_num = db.execute("select count(*) from cleanup;")[0][0]
