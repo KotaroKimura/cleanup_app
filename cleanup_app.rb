@@ -33,9 +33,15 @@ cleanup = CleanUp.new()
 db = SQLite3::Database.new("/vagrant/clean_up_app/cleanup.sqlite3")
 record_num = db.execute("select count(*) from cleanup;")[0][0]
 
-cleanup.restart_cleanup_action(db) if cleanup.check_boolean_value(db, record_num) == record_num
+if cleanup.check_boolean_value(db, record_num) == record_num
+  cleanup.restart_cleanup_action(db)
+  puts "一通りの掃除は終了されています！！！おつかれさまです！！！\n\n"
+end
+
 select = cleanup.select_cleanup_action(db)
 done = cleanup.done_cleanup_action(select[0], db)
+
+puts "#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
 
 db.close
 
