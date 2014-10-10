@@ -24,6 +24,14 @@ class SelectCleanupAction
       db.execute("update cleanup set boolean = 1 where id = #{one_record[0]};")
     end
   end
+
+  def select_unclean_area(db)
+    db.execute("SELECT * FROM cleanup where boolean = 0;").sample(1)
+  end
+
+  def update_boolean_value(unclean_area, db)
+    db.execute("update cleanup set boolean = 1 where id = #{unclean_area[0]};")
+  end
 end
 
 
@@ -38,8 +46,8 @@ if BooleanValue.new().check_boolean_value(boolean_value, record_num, all_record)
   SelectCleanupAction.new().return_inital_values(db)
   SelectCleanupAction.new().random_select(db)
 else
-  puts "booleanの値が一つでもfalse"
-  #booleanが「0」のレコードを取得し、ランダムで選択
+  unclean_area = SelectCleanupAction.new().select_unclean_area(db)
+  update = SelectCleanupAction.new().update_boolean_value(unclean_area[0], db)
 end
 
 db.close
