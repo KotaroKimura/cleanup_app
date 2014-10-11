@@ -36,6 +36,10 @@ class Action < JugeBooleanValues
     @record_num = @db.execute("select count(*) from cleanup;")[0][0]
   end
 
+  def execute_selected_action(action_name)
+    method(action_name).call
+  end
+
   def create_action
     @db.execute("insert into cleanup values(#{@record_num + 1}, ?, ?, 0, 1)")
     @db.close
@@ -54,23 +58,25 @@ class Action < JugeBooleanValues
   end
 end
 
-class Displays
-  def display_menu
+class Display < Action
+  def initialize
+    @action = Action.new()
+  end
+
+  def menu
     serial_num = 1
     items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択"]
+    key = {1 => "create_action", 2 => "auto_select_action"}
 
     puts "実行したい項目の「番号」を選んでださい。"
     items.each do |item|
       puts "No.#{serial_num} #{item}"
       serial_num += 1
     end
-    @selected_item = gets.chomp
-  end
-
-  def select_key
-    key = {1 => "create_action", 2 => "auto_select_action"}
-    action_name = key[@selected_item.to_i]
+    item_num = gets.chomp
+    @action.execute_selected_action(key[item_num.to_i])
   end
 end
 
-Action.new().auto_select_action
+Display.new().menu
+
