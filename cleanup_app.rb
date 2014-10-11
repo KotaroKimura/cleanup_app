@@ -24,7 +24,7 @@ class JugeBooleanValues
     db.execute("SELECT * FROM cleanup where boolean = 0;").sample(1)
   end
 
-  def change_boolean_value(db)
+  def change_boolean_value(select, db)
     db.execute("update cleanup set boolean = 1 where id = #{select[0]};")
   end
 end
@@ -34,6 +34,7 @@ class Action < JugeBooleanValues
     @cleanup = JugeBooleanValues.new()
     @db = SQLite3::Database.new("/vagrant/sqlite/cleanup.sqlite3")
     @record_num = @db.execute("select count(*) from cleanup;")[0][0]
+    @locations = {1 => "居間", 2 => "玄関・台所"}
   end
 
   def execute_selected_action(action_name)
@@ -41,7 +42,9 @@ class Action < JugeBooleanValues
   end
 
   def create_action
-    @db.execute("insert into cleanup values(#{@record_num + 1}, ?, ?, 0, 1)")
+    print "\n【場所】\n#{@locations.to_a}の中から選んでください(入力は「番号」です)："; location = gets.chomp
+    print "\n【ミッション】\n５分程度で終わる内容にしてください："; action = gets.chomp
+    @db.execute("insert into cleanup values(#{@record_num + 1}, ?, ?, 0, 1)", location, action)
     @db.close
   end
 
@@ -68,12 +71,12 @@ class Display < Action
     items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択"]
     key = {1 => "create_action", 2 => "auto_select_action"}
 
-    puts "実行したい項目の「番号」を選んでださい。"
+    puts "実行したい項目の「番号」を選んでください。\n"
     items.each do |item|
       puts "No.#{serial_num} #{item}"
       serial_num += 1
     end
-    item_num = gets.chomp
+    print "選択番号："; item_num = gets.chomp
     @action.execute_selected_action(key[item_num.to_i])
   end
 end
