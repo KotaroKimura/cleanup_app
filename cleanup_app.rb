@@ -5,8 +5,8 @@ require 'rubygems'
 require 'sqlite3'
 require 'pry-byebug'
 
-class CleanUp
-  def check_boolean_value(db, record_num)
+class JugeBooleanValues
+  def check_boolean_values(db, record_num)
     boolean_value = 0
     all_record = db.execute("SELECT * FROM cleanup;")
 
@@ -16,37 +16,44 @@ class CleanUp
     boolean_value
   end
 
-  def restart_cleanup_action(db)
+  def reset_boolean_values(db)
     db.execute("update cleanup set boolean = 0;")
   end
 
-  def select_cleanup_action(db)
+  def select_record_randomly(db)
     db.execute("SELECT * FROM cleanup where boolean = 0;").sample(1)
   end
 
-  def done_cleanup_action(select, db)
+  def change_boolean_value(select, db)
     db.execute("update cleanup set boolean = 1 where id = #{select[0]};")
   end
 end
 
-class Action
+class Action < JugeBooleanValues
+  def initialize
+    @cleanup = JugeBooleanValues.new()
+  end
+
   def create_action(db, record_num)
     db.execute("insert into cleanup values(#{record_num + 1}, ?, ?, 0, 1)")
   end
+
+  def auto_select_action(db, record_num)
+    if @cleanup.check_boolean_values(db, record_num) == record_num
+      @cleanup.reset_boolean_values(db)
+      puts "一通りの掃除は終了されています！！！おつかれさまです！！！\n今日は一日お休みです！！！！\n\n"
+    else
+      select = @cleanup.select_record_randomly(db)
+      @cleanup.change_boolean_value(select[0], db)
+      puts "#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
+    end
+  end
 end
 
-cleanup = CleanUp.new()
 db = SQLite3::Database.new("/vagrant/sqlite/cleanup.sqlite3")
 record_num = db.execute("select count(*) from cleanup;")[0][0]
 
-if cleanup.check_boolean_value(db, record_num) == record_num
-  cleanup.restart_cleanup_action(db)
-  puts "一通りの掃除は終了されています！！！おつかれさまです！！！\n今日は一日お休みです！！！！\n\n"
-else
-  select = cleanup.select_cleanup_action(db)
-  cleanup.done_cleanup_action(select[0], db)
-  puts "#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
-end
+Action.new().auto_select_action(db, record_num)
 
 db.close
 
