@@ -36,7 +36,7 @@ class Action
 end
 
 cleanup = CleanUp.new()
-db = SQLite3::Database.new("/vagrant/clean_up_app/cleanup.sqlite3")
+db = SQLite3::Database.new("/vagrant/sqlite/cleanup.sqlite3")
 record_num = db.execute("select count(*) from cleanup;")[0][0]
 
 if cleanup.check_boolean_value(db, record_num) == record_num
