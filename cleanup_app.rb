@@ -51,11 +51,7 @@ class Action < JugeBooleanValues
 end
 
 class Display
-  def initialize
-    @hash = {1 => "create_action", 2 => "auto_select_action"}
-  end
-
-  def menu
+  def display_menu
     serial_num = 1
     items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択"]
 
@@ -67,7 +63,9 @@ class Display
     @selected_item = gets.chomp
   end
 
-  def select_key(@selected_item)
+  def select_key
+    key = {1 => "create_action", 2 => "auto_select_action"}
+    action_name = key[@selected_item.to_i]
   end
 end
 
