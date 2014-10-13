@@ -59,6 +59,14 @@ class Action < JugeBooleanValues
     end
     @db.close
   end
+
+  def list_acion
+    puts "\n現在登録されている【ミッション】一覧です"
+    @db.execute("select id, action, location from cleanup;").each do |record|
+      puts "No.#{record[0]} #{record[1]}(場所:#{@locations[record[2]]})"
+    end
+    @db.close
+  end
 end
 
 class Display < Action
@@ -73,7 +81,7 @@ class Display < Action
 
     puts "実行したい項目の「番号」を選んでください。\n"
     items.each do |item|
-      puts "No.#{serial_num} #{item}"
+      puts "#{serial_num}. #{item}"
       serial_num += 1
     end
     print "選択番号："; item_num = gets.chomp
