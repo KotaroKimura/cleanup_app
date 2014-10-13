@@ -68,8 +68,8 @@ class Display < Action
 
   def menu
     serial_num = 1
-    items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択"]
-    key = {1 => "create_action", 2 => "auto_select_action"}
+    items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択", "掃除アクション一覧"]
+    key = {1 => "create_action", 2 => "auto_select_action", 3 => "list_acion"}
 
     puts "実行したい項目の「番号」を選んでください。\n"
     items.each do |item|
