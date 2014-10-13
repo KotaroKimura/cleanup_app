@@ -59,6 +59,14 @@ class Action < JugeBooleanValues
     end
     @db.close
   end
+
+  def list_action
+    puts "\n現在登録されている【ミッション】一覧です"
+    @db.execute("select id, action, location from cleanup;").each do |record|
+      puts "No.#{record[0]} #{record[1]}(場所:#{@locations[record[2]]})"
+    end
+    @db.close
+  end
 end
 
 class Display < Action
@@ -68,12 +76,12 @@ class Display < Action
 
   def menu
     serial_num = 1
-    items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択"]
-    key = {1 => "create_action", 2 => "auto_select_action"}
+    items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択", "掃除アクション一覧"]
+    key = {1 => "create_action", 2 => "auto_select_action", 3 => "list_action"}
 
     puts "実行したい項目の「番号」を選んでください。\n"
     items.each do |item|
-      puts "No.#{serial_num} #{item}"
+      puts "#{serial_num}. #{item}"
       serial_num += 1
     end
     print "選択番号："; item_num = gets.chomp
