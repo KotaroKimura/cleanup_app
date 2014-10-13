@@ -50,6 +50,7 @@ class Action
     end
     
     if /\Ayes\z/ =~ choice
+      @db.close if current_method_name.nil?
       exit 0 if current_method_name.nil?
       execute_selected_action(current_method_name) unless current_method_name.nil?
     elsif /\Ano\z/ =~ choice
