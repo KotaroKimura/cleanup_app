@@ -29,35 +29,61 @@ class JugeBooleanValues
   end
 end
 
-class Action < JugeBooleanValues
+class Action
   def initialize
+    @display = Display.new()
     @cleanup = JugeBooleanValues.new()
+    @locations = {1 => "居間", 2 => "玄関・台所"}
     @db = SQLite3::Database.new("/vagrant/sqlite/cleanup.sqlite3")
     @record_num = @db.execute("select count(*) from cleanup;")[0][0]
-    @locations = {1 => "居間", 2 => "玄関・台所"}
+  end
+
+  def close_app
+    print "本当によろしいですか？(yes/no) => "; choice = gets.chomp
+    if /\Ayes\z/ =~ choice
+      exit 0
+    elsif /\Ano\z/ =~ choice
+      @display.menu
+    else
+      puts "表記が誤っています。もう一度入力してください。"
+      close_app
+    end
+    @db.close
   end
 
   def execute_selected_action(action_name)
     method(action_name).call
   end
 
+  def juge_continue_action(current_method_name)
+    print "継続してこの処理を行いますか？(yes/no) => "; choice = gets.chomp
+    if /\Ayes\z/ =~ choice
+      execute_selected_action(current_method_name)
+    elsif /\Ano\z/ =~ choice
+      @display.menu
+    else
+      puts "表記が誤っています。もう一度入力してください。"
+      juge_continue_action(current_method_name)
+    end
+  end
+
   def create_action
-    print "\n【場所】\n#{@locations.to_a}の中から選んでください(入力は「番号」です)："; location = gets.chomp
-    print "\n【ミッション】\n５分程度で終わる内容にしてください："; action = gets.chomp
+    print "\n【場所】：#{@locations[1]}の中から選んでください(入力は「番号」です) => "; location = gets.chomp
+    print "【ミッション】：５分程度で終わる内容にしてください => "; action = gets.chomp
     @db.execute("insert into cleanup values(#{@record_num + 1}, ?, ?, 0, 1)", location, action)
-    @db.close
+    juge_continue_action(__method__.to_s)
   end
 
   def auto_select_action
     if @cleanup.check_boolean_values(@db, @record_num) == @record_num
       @cleanup.reset_boolean_values(@db)
-      puts "\n一通りの掃除は終了されています！！！おつかれさまです！！！\n今日は一日お休みです！！！！\n\n"
+      puts "\n一通りの掃除は終了されています！！！おつかれさまです！！！\n今日は一日お休みです！！！！\n"
     else
       select = @cleanup.select_record_randomly(@db)
       @cleanup.change_boolean_value(select[0], @db)
-      puts "\n#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n\n"
+      puts "\n#本日のお掃除ミッション#\nヾ(*・ω・)ノ【#{select[0][2]}】ヾ(・ω・*)ノ\n"
     end
-    @db.close
+    @display.menu
   end
 
   def list_action
@@ -65,26 +91,24 @@ class Action < JugeBooleanValues
     @db.execute("select id, action, location from cleanup;").each do |record|
       puts "No.#{record[0]} #{record[1]}(場所:#{@locations[record[2]]})"
     end
-    @db.close
+    @display.menu
   end
 end
 
-class Display < Action
-  def initialize
-    @action = Action.new()
-  end
-
+class Display
   def menu
-    serial_num = 1
-    items = ["掃除アクションの追加", "本日のお掃除ミッションの自動選択", "掃除アクション一覧"]
-    key = {1 => "create_action", 2 => "auto_select_action", 3 => "list_action"}
+    @action = Action.new()
 
-    puts "実行したい項目の「番号」を選んでください。\n"
+    serial_num = 1
+    items = ["掃除アクション一覧", "掃除アクションの追加", "本日のお掃除ミッションの自動選択", "アプリをクローズする"]
+    key = {2 => "create_action", 3 => "auto_select_action", 1 => "list_action", 4 => "close_app"}
+
+    puts "\n実行したい項目の「番号」を選んでください。\n"
     items.each do |item|
       puts "#{serial_num}. #{item}"
       serial_num += 1
     end
-    print "選択番号："; item_num = gets.chomp
+    print "選択番号 => "; item_num = gets.chomp
     @action.execute_selected_action(key[item_num.to_i])
   end
 end
