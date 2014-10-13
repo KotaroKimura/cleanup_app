@@ -44,9 +44,9 @@ class Action
 
   def juge_continue_action(current_method_name = nil)
     if current_method_name.nil?
-      print "本当にクローズしてもよろしいですか？(yes/no) => "; choice = gets.chomp
+      print "\n本当にクローズしてもよろしいですか？(yes/no) => "; choice = gets.chomp
     else
-      print "継続してこの処理を行いますか？(yes/no) => "; choice = gets.chomp
+      print "\n継続してこの処理を行いますか？(yes/no) => "; choice = gets.chomp
     end
     
     if /\Ayes\z/ =~ choice
@@ -61,8 +61,15 @@ class Action
   end
 
   def create_action
-    print "\n【場所】：#{@locations[1]}の中から選んでください(入力は「番号」です) => "; location = gets.chomp
-    print "【ミッション】：５分程度で終わる内容にしてください => "; action = gets.chomp
+    puts "\nお掃除エリアを選んださい。"
+    @locations.each do |location|
+      puts "#{location[0]}.【#{location[1]}】"
+    end
+    print "上記の中から選んでください(入力は「番号」です) => "; location = gets.chomp
+
+    puts "ミッション内容を入力してください。５分程度で終わる内容がベストです。"
+    print "ミッションの内容 => "; action = gets.chomp
+
     @db.execute("insert into cleanup values(#{@record_num + 1}, ?, ?, 0, 1)", location, action)
     juge_continue_action(__method__.to_s)
   end
@@ -80,7 +87,7 @@ class Action
   end
 
   def list_action
-    puts "\n現在登録されている【ミッション】一覧です。"
+    puts "\n【ミッション一覧】"
     @db.execute("select id, action, location from cleanup;").each do |record|
       puts "No.#{record[0]} #{record[1]}(場所:#{@locations[record[2]]})"
     end
@@ -93,7 +100,7 @@ class Display
     @action = Action.new()
 
     serial_num = 1
-    items = ["掃除アクション一覧", "掃除アクションの追加", "本日のお掃除ミッションの自動選択", "アプリをクローズする"]
+    items = ["お掃除ミッション一覧", "お掃除ミッション追加", "本日のお掃除ミッションを自動選択", "クローズする"]
     key = {2 => "create_action", 3 => "auto_select_action", 1 => "list_action", 4 => "juge_continue_action"}
 
     puts "\n実行したい項目の「番号」を選んでください。\n"
