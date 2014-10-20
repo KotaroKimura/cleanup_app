@@ -100,14 +100,12 @@ class Display
   def menu
     @action = Action.new()
 
-    serial_num = 1
     items = ["お掃除ミッション一覧", "お掃除ミッション追加", "本日のお掃除ミッションを自動選択", "クローズする"]
     key = {2 => "create_action", 3 => "auto_select_action", 1 => "list_action", 4 => "juge_continue_action"}
 
     puts "\n実行したい項目の「番号」を選んでください。\n"
-    items.each do |item|
-      puts "#{serial_num}. #{item}"
-      serial_num += 1
+    items.each_with_index do |item, serial_num|
+      puts "#{serial_num + 1}. #{item}"
     end
     print "選択番号 => "; item_num = gets.chomp
     @action.execute_selected_action(key[item_num.to_i])
