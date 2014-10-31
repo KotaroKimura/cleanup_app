@@ -29,6 +29,37 @@ class JugeBooleanValues
   end
 end
 
+class JugeInputValues
+  def initialize
+    @action = Action.new()
+    @key = {2 => "create_action", 3 => "auto_select_action", 1 => "list_action", 4 => "juge_continue_action"}
+  end
+
+  def half_width_digit(input_value)
+    @action.execute_selected_action(@key[input_value.to_i])
+  end
+
+  def fall_width_digit(input_value)
+    half_width_digit = input_value.tr!("０-９", "0-9")
+    @action.execute_selected_action(@key[half_width_digit.to_i])
+  end
+
+  def other_words
+    puts "\n入力が間違っています。実行したい項目の「番号」を入力して下さい。"
+    Display.new().menu
+  end
+
+  def juge_input_values(input_value)
+    if input_value =~ /^[0-9]+$/
+      half_width_digit(input_value)
+    elsif input_value =~ /^[０-９]+$/
+      fall_width_digit(input_value)
+    else
+      other_words
+    end
+  end
+end
+
 class Action
   def initialize
     @display = Display.new()
@@ -98,17 +129,14 @@ end
 
 class Display
   def menu
-    @action = Action.new()
-
     items = ["お掃除ミッション一覧", "お掃除ミッション追加", "本日のお掃除ミッションを自動選択", "クローズする"]
-    key = {2 => "create_action", 3 => "auto_select_action", 1 => "list_action", 4 => "juge_continue_action"}
-
     puts "\n実行したい項目の「番号」を選んでください。\n"
     items.each_with_index do |item, serial_num|
       puts "#{serial_num + 1}. #{item}"
     end
+
     print "選択番号 => "; item_num = gets.chomp
-    @action.execute_selected_action(key[item_num.to_i])
+    JugeInputValues.new().juge_input_values(item_num)
   end
 end
 
