@@ -50,8 +50,8 @@ class JugeInputValues
   end
 
   def juge_input_values(input_value)
-    half_width_digit(input_value) if input_value =~ /^[0-9]+$/
-    fall_width_digit(input_value) if input_value =~ /^[０-９]+$/
+    half_width_digit(input_value) if input_value =~ /^[0-9]+$/ && input_value.to_i <= @key.max[0]
+    fall_width_digit(input_value) if input_value =~ /^[０-９]+$/ && input_value.to_i <= @key.max[0]
     other_words
   end
 end
