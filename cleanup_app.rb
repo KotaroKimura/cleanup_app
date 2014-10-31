@@ -50,13 +50,9 @@ class JugeInputValues
   end
 
   def juge_input_values(input_value)
-    if input_value =~ /^[0-9]+$/
-      half_width_digit(input_value)
-    elsif input_value =~ /^[０-９]+$/
-      fall_width_digit(input_value)
-    else
-      other_words
-    end
+    half_width_digit(input_value) if input_value =~ /^[0-9]+$/
+    fall_width_digit(input_value) if input_value =~ /^[０-９]+$/
+    other_words
   end
 end
 
